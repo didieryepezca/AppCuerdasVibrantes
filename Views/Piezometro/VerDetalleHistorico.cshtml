@@ -1,0 +1,473 @@
+﻿@model AppCuerdasVibrantes.Models.Entities.PIEZOMETROS
+
+@{
+    ViewData["Title"] = "VerDetalleHistorico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script type="text/javascript">
+
+
+    var pie = '@ViewBag.piezometro';
+
+    window.onload = load;
+
+    function load()
+    {
+        funTablaDetalle(pie);
+    }
+
+    function funTablaDetalle(nombre) {
+        
+        var piezometro = nombre;
+
+        var cont = 1;
+        var cuerpo = "";
+     
+        var url = "/Piezometro/FunPiezometroDetalleTabla";
+        $.get(url, { nombre: piezometro }, function (data) {
+
+            console.log(data);
+
+            cuerpo = cuerpo + '<tbody id = "detallePiezometro">';
+
+            data.forEach(function (element) {             
+                
+
+                cuerpo = cuerpo + '<tr>';
+
+                cuerpo = cuerpo + '<td>' + cont + '</td>';
+
+                cuerpo = cuerpo + '<td> <strong>' + element.piezometro + '</strong></td>';
+                cuerpo = cuerpo + '<td>' + moment(element.fecha).format('DD/MM/YYYY') + '</td>';
+                cuerpo = cuerpo + '<td>' + element.to_valor + '</td>';
+                cuerpo = cuerpo + '<td>' + element.ro_valor + '</td>';
+                cuerpo = cuerpo + '<td>' + element.so_valor + '</td>';
+                cuerpo = cuerpo + '<td>' + element.so_valor_kpa + '</td>';
+                cuerpo = cuerpo + '<td>' + element.p_valor_kpa + '</td>';
+                cuerpo = cuerpo + '<td>' + element.piezometric_head + '</td>';
+                cuerpo = cuerpo + '<td>' + element.mh2o + '</td>';
+                cuerpo = cuerpo + '<td>' + element.water_level + '</td>';
+
+
+                //cuerpo = cuerpo + '<td> <strong>' + moment(element.fechA_INGRESO).format('DD/MM/YYYY') + '</strong></td>';      
+
+                //cuerpo = cuerpo + '<td style="vertical-align:middle;text-align:center"><a href="/Home/UpdateProbado?id=' + element.id + '" class="btn btn-xs btn-default"> <i class="fa fa-edit"></i>Corregir</a></td>';
+
+                cuerpo = cuerpo + '</tr>';
+
+
+                cont = cont + 1;
+
+             });
+            cuerpo = cuerpo + '</tbody>';
+
+
+            $('#example').append(cuerpo).fadeIn(300000);
+        });
+    };
+
+</script>
+
+
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-7 col-md-6 col-sm-12">
+            <h2>
+                Detalle de Historico de Piezometro
+            </h2>
+        </div>
+        <div class="col-lg-5 col-md-6 col-sm-12">
+
+            <ul class="breadcrumb float-md-right">
+                <li class="breadcrumb-item"><a href="index.html"><i class="zmdi zmdi-home"></i>Cuerdas Vibrantes</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0);">Detalle Historico de Piezometro</a></li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<form asp-action="VerDetalleHistorico">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="id" />
+    <div class="container-fluid">
+
+        <div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Data relevante</strong> de Piezometro </h2>
+
+                    </div>
+                    <div class="body">
+
+                        <div class="row clearfix">
+                            <div class="col-lg-4 col-md-12">
+
+                                <div class="row">
+                                    <div class="table-responsive" style="height: auto; width: 90%;">
+
+                                        <table class="table table-hover m-b-0 topics">
+                                            <tr style="background-color:gold">
+                                                <th>Datos principales</th>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Piezometer:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="piezometro" class="form-control" placeholder="Piezometro" />
+                                                        <span asp-validation-for="piezometro" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Serial #:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="numero_serie" class="form-control" placeholder="Serial #" />
+                                                        <span asp-validation-for="numero_serie" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Model:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="modelo" class="form-control" placeholder="Modelo" />
+                                                        <span asp-validation-for="modelo" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-8 col-md-12">
+
+
+                                <div class="row">
+                                    <div class="table-responsive" style="height: auto; width: 90%;">
+
+                                        <table class="table table-hover m-b-0">
+                                            <tr style="background-color:gold">
+                                                <th></th>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Northing (m)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="northing" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Piezometro" />
+                                                        <span asp-validation-for="northing" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Easting (m)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="easting" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Serial #" />
+                                                        <span asp-validation-for="easting" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Elevation (m)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="elevation" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="elevation" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>Instrument Tip Elevation (m)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="instrument_tip_elevation" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="instrument_tip_elevation" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>Geomembrane Elevation (m)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="geomembrane_elevation" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="geomembrane_elevation" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+
+
+                                        </table>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                        <div class="row clearfix">
+
+
+
+
+                            <div class="col-lg-6 col-md-12">
+
+                                <div class="row">
+                                    <div class="table-responsive" style="height: auto; width: 90%;">
+
+                                        <table class="table table-hover m-b-0">
+                                            <tr style="background-color:gold">
+                                                <th></th>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>G (kPa/digit)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="g_valor" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Piezometro" />
+                                                        <span asp-validation-for="g_valor" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>K (kPa/°C)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="k_valor" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Serial #" />
+                                                        <span asp-validation-for="k_valor" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Ro digit</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="ro_valor" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="ro_valor" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>To (°C)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="to_valor" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="to_valor" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>So (kPa)</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="so_valor" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="so_valor" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+
+
+                                        </table>
+
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+
+
+                            <div class="col-lg-6 col-md-12">
+
+                                <div class="row">
+                                    <div class="table-responsive" style="height: auto; width: 90%;">
+
+                                        <table class="table table-hover m-b-0">
+                                            <tr style="background-color:gold">
+                                                <th></th>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Estimated data:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="estimated_data" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Piezometro" />
+                                                        <span asp-validation-for="estimated_data" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Recorded data:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="recorded_data" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Serial #" />
+                                                        <span asp-validation-for="recorded_data" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+
+                                                <th>Calculated value:</th>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input asp-for="calculated_value" class="form-control" onkeypress="javascript:return isNumber(event)" placeholder="Modelo" />
+                                                        <span asp-validation-for="calculated_value" class="text-danger"></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+
+
+
+
+                                        </table>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+
+                        </div>
+
+                        @*<div class="row clearfix">
+
+                                <div class="col-sm-12">
+                                    <button id="btnGrabar" type="submit" class="btn btn-raised btn-round btn-primary">Guardar</button>
+
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Detalle Historico</strong> de Piezometro </h2>
+
+                    </div>
+                    <div class="body">
+                        <div class="table-responsive" style="height: auto; width: auto;">
+                            <table class="table table-hover m-b-0" id="example">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <strong>#</strong>
+                                        </th>
+                                        <th>Piezometer</th>
+                                        <th>
+                                            Fecha
+                                        </th>
+                                        <th>
+                                            T1 (°C)
+                                        </th>
+                                        <th>
+                                            R1 digit
+                                        </th>
+                                        <th>
+                                            S1 (hPa)
+                                        </th>
+                                        <th>
+                                            S1 (kPa)
+                                        </th>
+                                        <th>
+                                            P1 (kPa)
+                                        </th>
+                                        <th>
+                                            Piezometric Head(m)
+                                        </th>
+                                        <th>
+                                            Delta H2O
+                                        </th>
+                                        <th>
+                                            Water Level(m)
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                        </div>
+
+
+
+                        @*<div class="row clearfix">
+
+                                <div class="col-sm-12">
+                                    <button id="btnGrabar" type="submit" class="btn btn-raised btn-round btn-primary">Guardar</button>
+
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+
+
+
+    </div>
+</form>
+
+<div>
+    <a class="btn btn-dark" asp-controller="Home" asp-action="Index">Regresar</a>
+</div>
+
+<script src="https://momentjs.com/downloads/moment.js"></script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

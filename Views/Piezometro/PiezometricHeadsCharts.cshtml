@@ -1,0 +1,348 @@
+﻿<!DOCTYPE HTML>
+@{
+    ViewData["Title"] = "PiezometricHeadsCharts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+
+
+    window.onload = funPiezometroComboCheckbox;
+
+    function funPiezometroComboCheckbox() {
+
+        var count = 1;
+        var select = '';
+
+        var url = "/Piezometro/FunTraerPiezometrosComboCheckBox";
+        $.get(url, { status: "ACTIVO" }, function (data) {                          
+
+            //console.log(data);
+
+            data.forEach(function (element) {
+
+                //$('#opt' + count).remove();
+
+                select = select + '<li><div class="form-group"><label><input id="' + element.piezometro + '-' + count + '" type="checkbox" value="' + element.piezometro + '" onclick="PiezometrosAddCheckBox()">' + element.piezometro + '</label></div></li>';                
+
+                count = count + 1;
+            });
+
+            $('#piezometrosCombo').append(select);
+
+        });
+    }
+
+    var selectedPiezometros = [];
+
+    function PiezometrosAddCheckBox()
+    {
+        $(document).on('click', jQuery("input[type=checkbox]:checked"), function () {
+
+                selectedPiezometros = []; //limpiar array antes de volver a llenar
+
+                var n = jQuery("input[type=checkbox]:checked").length;
+                if (n > 0) {
+                    jQuery("input[type=checkbox]:checked").each(function () {
+
+                        selectedPiezometros.push($(this).val());
+                    });
+                }
+                //$("#piezometrosBusqueda").val(selectedPiezometros);
+                //console.log(selectedPiezometros);
+            });
+    }
+
+    function FunGraficar()
+    {
+        var fecha_inicio = $('#fecI').val();
+        var fecha_fin = $('#fecF').val();
+        var intervaloY =  Number($('#inputY').val()); 
+
+        console.log(intervaloY);
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+
+            zoomEnabled: true,
+            exportEnabled: true,
+            animationEnabled: true,
+            theme: "light2",
+            title: {
+                text: "MSSF - La Quinua Pila de Lixiviación TSF - DAM Norte -  Piezómetros de Cuerda Vibrante",
+                fontSize: 25
+            },
+            axisX: {
+                interval: 1,
+                crosshair: {
+                    enabled: true,
+                    snapToDataPoint: true
+                }
+            },
+            axisY: [{
+                title: "Cabeza Piezométrica (metros de agua)",
+                lineColor: "#C24642",
+                tickColor: "#C24642",
+                labelFontColor: "#C24642",
+                titleFontColor: "#C24642",
+                includeZero: false,
+                interval: intervaloY,
+                suffix: " m",
+                crosshair: {
+                    enabled: true
+                }
+            },
+            ],
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                itemclick: toggleDataSeries,
+                fontSize: 16,
+            },
+            data: [    ]
+            
+        });
+        chart.render();
+
+        
+        function toggleDataSeries(e) {
+            if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            e.chart.render();
+        }      
+        //-------------------- añadiendo nueva serie de datos de puntos al grafico a traves del array creado
+        //console.log(selectedPiezometros);
+
+        //-------------------- MANERA EJEMPLO
+        //var type = "line";
+        //var fillOpacity = .4;
+        //var dataPoints = [];
+        //var dataPoints2 = [];
+        //for (var i = 0; i < 20; i++) {
+        //    dataPoints.push({ y: Math.random() * 10 - 5 });
+        //    dataPoints2.push({ y: Math.random() * 8 - 3 });
+        //}
+        //chart.options.data.push({ type: type, fillOpacity: fillOpacity, dataPoints: dataPoints });
+        //chart.options.data.push({ type: type, fillOpacity: fillOpacity, dataPoints: dataPoints2 });
+        //chart.render();    
+        //-------------------- MANERA EJEMPLO
+       
+        //var count = -1;
+
+        var arrayContainer = [];                
+        var piezometroArray = new Array();
+
+        selectedPiezometros.forEach(function (piezometro, indice, array) {  //-----------------END ARRAY FOREACH PIEZOMETROS SELECCIONADOS
+
+            //console.log("En el índice " + indice + " hay este valor: " + piezometro);
+            //var piezometro = "TOVP14-13";
+            piezometroArray[indice] = new Array();          
+
+            var type = "line";
+            var fillOpacity = .4;    
+            var name;
+
+            $.ajax({
+                type: "GET",
+                url: "/Piezometro/FunGraficar?fecha_inicio=" + fecha_inicio + "&fecha_fin=" + fecha_fin + "&piezometro=" + piezometro,
+                contentType: false,
+                processData: false,
+                success: function (data) {                    
+                    
+                    // FUNCIONA
+                    data.forEach(function (element) {
+                                      
+                        if (element.piezometro == piezometro)
+                        {
+                            piezometroArray[indice].push({ y: element.piezometric_head, label: moment(element.fecha).format('DD/MM/YYYY') });     
+                            //console.log("entro"); 
+                        }                                                                                 
+                    });                      
+                   arrayContainer.push(piezometroArray[indice]);
+                }
+                 
+            });//--------------------------------END AJAX
+
+            chart.options.data.push({ type: type, name: piezometro, showInLegend: true, fillOpacity: fillOpacity, dataPoints: piezometroArray[indice] }); /// AÑADE LOS PIEZOMETROS QUE DESEAMOS GRAFICAR
+            chart.render();           
+        });//--------------------------------- END ARRAY FOREACH PIEZOMETROS SELECCIONADOS
+
+        //console.log(arrayContainer); 
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+
+
+</script>
+
+
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-5 col-sm-12">
+            <h2>
+                Graficar Piezometric Heads
+                <small>Graficos</small>
+            </h2>
+        </div>
+        <div class="col-lg-7 col-md-7 col-sm-12 text-right">
+            <ul class="breadcrumb float-md-right">
+                <li class="breadcrumb-item"><a href=""><i class="zmdi zmdi-home"></i><strong>Cuerdas Vibrantes</strong></a></li>
+                <li class="breadcrumb-item active">Graficar Piezometric Heads</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<body>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="header">
+                    <h2><strong>Graficar</strong> Piezometric Heads <small></small></h2>
+                </div>
+                <div class="header">
+                    <div class="row clearfix">
+
+                        <div class="col-lg-12 col-md-12">
+                            <div class="form-group">
+
+                                <p style="color:red"><strong>Seleccione el(los) piezometro(s), un rango de fechas y el intervalo del eje Y para graficar la data</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row clearfix">
+
+
+                        <div class="col-lg-3 col-md-12">
+                            <div class="form-group">
+
+                                <ul>
+                                    <li class="dropdown">
+                                        <a href="#" data-toggle="dropdown" class="dropdown-toggle"><strong>Piezometros</strong><b class="caret"></b></a>
+                                        <ul class="dropdown-menu" id="piezometrosCombo">
+                                            @*<li>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox">Uno
+                                    </label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox">Dos
+                                    </label>
+                                </div>
+                            </li>*@
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-2 col-md-12">
+                            <div class="form-group">
+                                @{
+                                    string desde = ViewBag.Fecha_Ini;
+
+                                    if (desde.Equals("0001-01-01"))
+                                    {
+                                        desde = DateTime.Today.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                <label class="control-label"><strong>Desde</strong></label>
+                                <input type="date" id="fecI" class="form-control" name="Fecha_Ini" value="@desde">
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 col-md-12">
+                            <div class="form-group">
+                                @{
+                                    string hasta = ViewBag.Fecha_Fin;
+
+                                    if (hasta.Equals("0001-01-01"))
+                                    {
+                                        hasta = DateTime.Today.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                <label class="control-label"><strong>Hasta</strong></label>
+                                <input type="date" id="fecF" class="form-control" name="Fecha_Fin" value="@hasta">
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-1 col-md-12">
+                            <div class="form-group">                            
+                                <label class="control-label"><strong>Intevalo eje Y</strong></label>
+                                <input type="text" id="inputY" onkeypress="javascript:return isNumber(event)" class="form-control">
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-2 col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">.</label>
+                                <button class="btn btn-raised btn-round btn-danger form-control" id="btnGraficar" onclick="FunGraficar();" style="float:left;">Graficar !</button>
+                            </div>
+                        </div>
+                    </div>
+                 
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="row clearfix">
+        <div class="col-md-12">
+            <div class="card parents-list">
+                <div class="header">
+                    <h2><strong>Grafico</strong> de Cabezas Piezometricas</h2>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div id="chartContainer" style="height: 500px; width: auto;"></div>
+
+
+                </div>
+
+                
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+
+
+</body>
+
+
+
+

@@ -1,0 +1,252 @@
+﻿@model IEnumerable<AppCuerdasVibrantes.Models.Entities.ARCHIVOS>
+
+@{
+    ViewData["Title"] = "VerArchivos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script type="text/javascript">
+
+    function ProcesarArchivo(archivo) {
+        console.log(archivo)
+
+        
+        $.ajax({
+            type: "POST",
+            url: "/Archivos/ProcesarArchivo?archivo="  + archivo,
+            contentType: false,
+            processData: false,
+            //data: data,
+            success: function (jres) {
+
+                //console.log(jres);
+
+                if (jres == "OK") {                  
+
+                    swal({
+                        title: "Correcto !",
+                        text: "Se proceso el archivo:  " + archivo + " correctamente",
+                        type: "success"
+                    }).then(function () {
+                        location.reload();
+                    });    
+
+                }
+                else{
+
+                    swal("ERROR", "Hubo un error durante el proceso", "warning");
+
+                }
+                ///-------------
+            },
+        });
+
+        
+
+    }
+
+
+
+
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+</script>
+
+
+<br />
+<form asp-action="VerArchivos" method="get">
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="header">
+
+                    <h2><strong>Buscar</strong> Archivo <small></small></h2>
+                    <div class="row clearfix">
+                        <div class="col-lg-0 col-md-12">
+                            <div class="form-group">
+                                <br />
+
+                                <strong><a asp-controller="Archivos" asp-action="ArchivoNuevo">Cargar Archivo Nuevo</a></strong>
+                                <br />
+                            </div>
+                        </div>
+
+                        <br />
+
+                        <div class="col-lg-3 col-md-12">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="nombre" placeholder="Ingrese Nombre de su Archivo">
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-2 col-md-12">
+                            <div class="form-group">
+
+                                @{
+                                    var search = 'B';
+
+                                }
+
+
+                                <button type="submit" value="@search" name="accion" class="btn btn-raised btn-round btn-info">Buscar</button>
+
+
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container-fluid">
+        <div class="row clearfix">
+            <div class="col-md-12">
+                <div class="card student-list">
+                    <div class="header">
+                        <h2><strong>Archivos</strong> cargados al sistema</h2>
+                        <ul class="header-dropdown">
+                            <li class="dropdown">
+                                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Exportar <i class="zmdi zmdi-more"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right slideUp">
+                                    <li> <a onclick="tableToExcel('example', 'ArchivosCargados')" style="cursor:pointer">Exportar a Excel</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul class="header-dropdown">
+                            <li class="dropdown">
+                                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="zmdi zmdi-more"></i> </a>
+                                <ul class="dropdown-menu dropdown-menu-right slideUp">
+                                    <li><a href="javascript:void(0);">Exportar a Excel</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="body">
+                        <div class="table-responsive" style="height: 380px">
+
+                            <table class="table table-hover m-b-0" id="example">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <strong>#</strong>
+                                        </th>
+                                        <th>Proceso</th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.estado_archivo)
+                                        </th>
+                                        <th>Data</th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.nombre_archivo)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.observaciones)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.usuario)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.fecha_carga)
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var count = 1;
+                                    }
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td style="vertical-align:middle;">
+                                                @count
+                                            </td>
+                                            @if (item.estado_archivo == "ACTUALIZADO")
+                                            {   <td>
+                                                    <div class="demo-google-material-icon"> <i class="material-icons">done</i> <span class="icon-name"></span> </div>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="align-items: flex-end">
+                                                    <span class="badge badge-neutral btn btn-neutral medium"> <a onclick="ProcesarArchivo('@item.nombre_archivo');"><i class="zmdi zmdi-settings"></i></a></span>
+                                                </td>
+                                            }
+
+                                            @if (item.estado_archivo == "ACTUALIZADO")
+                                            {
+                                                <td>
+                                                    <span class="badge badge-success"> @Html.DisplayFor(modelItem => item.estado_archivo)</span>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    <span class="badge badge-danger">@Html.DisplayFor(modelItem => item.estado_archivo)</span>
+                                                </td>
+                                            }
+                                            <td style="align-items: flex-end">
+                                                <span class="badge badge-neutral btn btn-neutral medium"><a asp-controller="Archivos" asp-action="VerDetalleExcelCargado" asp-route-filenombre="@item.nombre_archivo"><i class="zmdi zmdi-eye"></i></a></span>
+                                            </td>
+                                            <td>
+
+                                                <a style="color:blue" href="~/uploads/@item.nombre_archivo">@item.nombre_archivo</a>
+
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.observaciones)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.usuario)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.fecha_carga)
+                                            </td>
+
+                                            @{count = count + 1;}
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+
+
+                        </div>
+                    </div>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+
+
+</form>
+
+
+
+

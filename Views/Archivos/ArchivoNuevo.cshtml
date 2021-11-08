@@ -1,0 +1,225 @@
+﻿@model AppCuerdasVibrantes.Models.Entities.ARCHIVOS
+
+@{
+    ViewData["Title"] = "ArchivoNuevo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+
+    
+    function CargarArchivo() {
+
+        var fileUpload = $("#txtSubirA").get(0);
+        var files = fileUpload.files;
+
+        var data = new FormData();
+
+        for (var i = 0; i < files.length; i++) {
+            data.append(files[i].name, files[i]); }
+
+        var usuario = $('#txtUsuario').val();
+        
+        var observaciones = $('#txtObs').val();
+        
+
+        console.log("-----------------");
+
+        var form = $('#idDocTabla');
+
+
+        $.ajax({
+            type: "POST",
+            url: "/Archivos/adjuntarArchivo?user="  + usuario + "&obs=" + observaciones,
+            contentType: false,
+            processData: false,
+            data: data,
+            success: function (jres) {
+
+                //console.log(jres);
+
+                if (jres.registros == "OK") {
+
+                    $("#txtObs").val("");
+                    $('#txtSubirA').val("");
+                    $('#FileTagName').text("Seleccione el archivo que desea cargar.");
+
+                    swal("Cargado !", "Busca el archivo en la pantalla anterior", "success");
+
+                }
+                else if (jres.msg == "El campo descripcion/comentario debe ser llenado.") {
+
+                    swal("Atencion", "Por favor escribe una observacion o comentario para cargar tu archivo", "warning");
+
+                } else if (jres.msg == "El formato de una o varias columnas no es el establecido, por favor revisar el Excel.") {
+
+                    swal("Error", jres.msg, "warning");
+
+                } else if (jres.msg == "El archivo selecionado no es un documento Excel.Verifique que la extención del documento sea .XLS o .XLSX")
+                {
+                    swal("Error", jres.msg, "warning");
+                }         
+
+
+                ///-------------
+            },
+        });
+        return false;
+
+    };
+
+      
+
+
+    function FileDuplicado() {              
+
+        var inputTxtFile = $("#txtSubirA"); //busco la cajita de texto que captura el nombre de archivo
+        var itemFormFile = inputTxtFile[0].files; //busco la propiedad files para luego acceder al nombre
+        var fileDup = itemFormFile[0].name; // accedo al nombre del archivo
+
+        //console.log(inputTxtFile);
+        //console.log(itemFormFile);
+        //console.log(fileDup);     
+
+            var url = "/Archivos/ComprobarArchivoDuplicado";
+            var data = { "fileuploaded": fileDup };
+            var dataType = "json";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function (response) {
+                    console.log(response);
+                    if (response >= 1) {
+
+                        $('#txtSubirA').val("");
+
+                        swal("Atencion", "Ya se ha cargado anteriormente un archivo con el nombre: " + fileDup + "", "warning");
+                       
+                    }
+                    else {
+
+                        $('#FileTagName').text(fileDup);
+                        
+                        swal("Correcto !", "Tu archivo esta listo para ser cargado", "success");
+                    }
+                },
+                dataType: dataType
+            });
+
+    };
+
+
+
+
+
+
+</script>
+
+
+
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-7 col-md-6 col-sm-12">
+            <h2>
+                Agregar Archivo
+            </h2>
+        </div>
+        <div class="col-lg-5 col-md-6 col-sm-12">
+
+            <ul class="breadcrumb float-md-right">
+                <li class="breadcrumb-item"><a href="index.html"><i class="zmdi zmdi-home"></i>Cuerdas Vibrantes</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0);">Archivos</a></li>
+                <li class="breadcrumb-item active">Agregar Archivo</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <div class="container-fluid">
+        <div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Carga de archivos</strong> <small> Adjunte su archivo unicamente con extension  .XLS o .XLSX</small> </h2>
+
+                    </div>
+                    <div class="body">
+
+                        <div class="row clearfix">
+
+                            <div class="col-lg-4 col-md-12">
+                                <div class="form-group">
+
+                                    <input id="txtUsuario" value="@ViewBag.user" type="text" class="form-control" readonly />
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12 col-md-12">
+                                <div class="form-group">
+
+                                    <input id="txtObs" type="text" class="form-control" placeholder="Observaciones o comentarios" />
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <br />
+                        <br />
+
+
+                        <div class="row">
+
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <div id="frmFileUpload" class="dropzone dz-clickable" enctype="multipart/form-data">
+                                    <div class="dz-message">
+                                        <br />
+
+                                        <input id="txtSubirA" type="file" onchange="FileDuplicado();" class="form-control-file" />
+
+                                        <h4 id="FileTagName">Seleccione el archivo que desea cargar.</h4>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <input type="submit" value="Cargar Archivo" onclick="CargarArchivo()" class="btn btn-primary" style="float:right;" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+<div>
+    <a class="btn btn-danger" asp-controller="Archivos" asp-action="VerArchivos">Regresar</a>
+</div>
+
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
